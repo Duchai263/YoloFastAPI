@@ -7,19 +7,15 @@ import PIL.Image as Image
 
 app = FastAPI()
 
-label = []
-name = []
+
 save_dir = Path(r"D:\Work")
 model_dir = Path(r'C:\Users\ADMIN\Downloads\Compressed\exp\weights\best.pt')
 model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_dir)  # local model
-img = []
+
 
 @app.post("/files")
 async def UploadImage(image: UploadFile = File(...)):
-    name.append(image.filename)
-    img.append(await image.read())
-    image = Image.open(io.BytesIO(img[-1]))
+    image = Image.open(io.BytesIO(await image.read()))
     result = model(image)
-    label.append(result)
-    response = label[-1].pandas().xyxy[0].to_json(orient="records")
+    response = result.pandas().xyxy[0].to_json(orient="records")
     return Response(response)
