@@ -17,13 +17,7 @@ img = []
 @app.post("/files")
 async def UploadImage(image: UploadFile = File(...)):
     name.append(image.filename)
-    """with open(save_dir/name[-1],"wb") as img:
-        shutil.copyfileobj(image.file,img)"""
     img.append(await image.read())
-    return image.filename
-
-@app.get("/files")
-async def detect():
     image = Image.open(io.BytesIO(img[-1]))
     result = model(image)
     label.append(result)
