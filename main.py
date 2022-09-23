@@ -6,6 +6,8 @@ from fastapi.responses import JSONResponse
 import shutil
 
 app = FastAPI()
+model_dir = Path(r'C:\Users\ADMIN\Downloads\Compressed\exp\weights\best.pt')
+model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_dir)  # local model
 
 label = []
 name = []
@@ -20,8 +22,6 @@ async def UploadImage(file: UploadFile = File(...)):
 
 @app.get("/files")
 async def results():
-    model_dir = Path(r'C:\Users\ADMIN\Downloads\Compressed\exp\weights\best.pt')
-    model = torch.hub.load('ultralytics/yolov5', 'custom', path=model_dir)  # local model
     img = save_dir/name[-1]
     label.append(model(img))
     json = label[-1].pandas().xyxy[0].to_json(orient="records")
