@@ -20,7 +20,7 @@ async def UploadImage(image: UploadFile = File(...)):
     response = result.pandas().xyxy[0].to_json(orient="records")
     return Response(response)
 
-@app.post("/MultipleFiles")
+@app.post("/MultipleFiles", response_class=PlainTextResponse)
 async def UploadMultipleImages(images: list[UploadFile]):
     result = []
     response = []
@@ -28,5 +28,9 @@ async def UploadMultipleImages(images: list[UploadFile]):
         image =  Image.open(io.BytesIO(await each.read()))
         result.append(model(image))
         response.append(result[-1].pandas().xyxy[0].to_json(orient="records"))
+    
+    result_text =''
+    for each in response:
+        result_text = result_text + str(each) + '\n'
 
-    return {Response(res) for res in response}
+    return result_text
