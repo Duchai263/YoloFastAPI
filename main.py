@@ -23,20 +23,16 @@ async def UploadImage(image: UploadFile = File(...)):
     response = result.pandas().xyxy[0].to_json(orient="records")
     return Response(response)
 
-@app.post("/MultipleFiles", response_class=PlainTextResponse)
+@app.post("/MultipleFiles")
 async def UploadMultipleImages(images: list[UploadFile]):
     result = []
-    response = []
+    temp_dict = dict()
     for each in images:
         image =  Image.open(io.BytesIO(await each.read()))
         result.append(model(image))
-        response.append(result[-1].pandas().xyxy[0].to_json(orient="records"))
+        temp_dict.update({str(each.filename): result[-1].pandas().xyxy[0].to_dict()})
     
-    result_text =''
-    for each in response:
-        result_text = result_text + str(each) + '\n'
-
-    return result_text
+    return temp_dict
 
 #convert to 4 points
 def toxy(result):
@@ -66,17 +62,14 @@ async def UploadImage(image: UploadFile = File(...)):
     response = ConvertTo4Pts(result).to_json(orient="records")
     return Response(response)
 
-@app.post("/MultipleFiles/to4pts", response_class=PlainTextResponse)
+@app.post("/MultipleFiles/to4pts")
 async def UploadMultipleImages(images: list[UploadFile]):
     result = []
-    response = []
+    response = dict()
+    
     for each in images:
         image =  Image.open(io.BytesIO(await each.read()))
         result.append(model(image))
-        response.append(ConvertTo4Pts(result[-1]).to_json(orient="records"))
+        response.update({str(each.filename): ConvertTo4Pts(result[-1]).to_dict()})
     
-    result_text =''
-    for each in response:
-        result_text = result_text + str(each) + '\n'
-
-    return result_text
+    return response
